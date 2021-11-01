@@ -8,14 +8,15 @@ pub struct Gui {
 }
 
 impl Gui {
-    const ROWS : usize = 25;
-    const COLS : usize = 40;
+    const ROWS: usize = 25;
+    const COLS: usize = 40;
 
     pub fn new() -> Gui {
-        Gui { screen: [0u8; Gui::ROWS * Gui::COLS],
-        cursor_x: 0,
-        cursor_y: 0,
-        invmode: false,
+        Gui {
+            screen: [0u8; Gui::ROWS * Gui::COLS],
+            cursor_x: 0,
+            cursor_y: 0,
+            invmode: false,
         }
     }
 
@@ -59,29 +60,49 @@ impl Gui {
 
     fn write_char(&mut self, ch: u8) {
         match ch {
-            13 => { self.cursor_x = 0; self.next_line(); },
-            17 => { self.next_line(); },
-            18 => { self.invmode = true; },
-            19 => { self.cursor_x = 0; self.cursor_y = 0; },
-            29 => { self.move_right() },
-            145 => { if self.cursor_y > 0 { self.cursor_y -= 1; } }
-            146 => { self.invmode = false; },
-            147 => { self.clear_screen() },
-            157 => { if self.cursor_x > 0 {
-                self.cursor_x -= 1;
-            } else if self.cursor_y > 1 {
-                self.cursor_x = Gui::COLS - 1;
-                self.cursor_y -= 1;
-            } },
+            13 => {
+                self.cursor_x = 0;
+                self.next_line();
+            }
+            17 => {
+                self.next_line();
+            }
+            18 => {
+                self.invmode = true;
+            }
+            19 => {
+                self.cursor_x = 0;
+                self.cursor_y = 0;
+            }
+            29 => self.move_right(),
+            145 => {
+                if self.cursor_y > 0 {
+                    self.cursor_y -= 1;
+                }
+            }
+            146 => {
+                self.invmode = false;
+            }
+            147 => self.clear_screen(),
+            157 => {
+                if self.cursor_x > 0 {
+                    self.cursor_x -= 1;
+                } else if self.cursor_y > 1 {
+                    self.cursor_x = Gui::COLS - 1;
+                    self.cursor_y -= 1;
+                }
+            }
             32..=63 => {
                 self.screen[self.cursor_y * Gui::COLS + self.cursor_x] = ch;
                 self.move_right();
-            },
-            64..=95 => { 
+            }
+            64..=95 => {
                 self.screen[self.cursor_y * Gui::COLS + self.cursor_x] = ch - 64;
                 self.move_right();
             }
-            _ => { panic!("Unhandled character {}", ch); },
+            _ => {
+                panic!("Unhandled character {}", ch);
+            }
         }
     }
 

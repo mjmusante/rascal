@@ -1,7 +1,7 @@
 use bracket_terminal::prelude::*;
 
-use crate::gui::*;
 use crate::game::*;
+use crate::gui::*;
 
 pub struct Interface {
     gui: Gui,
