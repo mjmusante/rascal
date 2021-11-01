@@ -1,6 +1,9 @@
 use bracket_terminal::prelude::*;
 
 mod interface;
+mod gui;
+mod game;
+
 use interface::Interface;
 
 bracket_terminal::embedded_resource!(PETSCII, "resources/petchars.png");
