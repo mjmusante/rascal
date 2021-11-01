@@ -16,7 +16,9 @@ impl Game {
 
     pub fn run(&mut self, gui: &mut Gui) {
         match self.stage {
-            Stage::Init => { gui.clear_screen(); self.stage = Stage::Wait; }
+            Stage::Init => { gui.clear_screen();
+                gui.write_string(&"HELLO, WORLD");
+                self.stage = Stage::Wait; }
             Stage::Wait => { }
         }
     }
