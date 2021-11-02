@@ -3,6 +3,7 @@ use bracket_terminal::prelude::*;
 mod game;
 mod gui;
 mod interface;
+mod map;
 
 use interface::Interface;
 

@@ -10,8 +10,11 @@ pub struct Interface {
 
 impl GameState for Interface {
     fn tick(&mut self, ctx: &mut BTerm) {
-        ctx.cls();
+        if let Some(key) = ctx.key {
+            self.game.handle_key(key);
+        }
 
+        ctx.cls();
         self.gui.draw(ctx);
         self.game.run(&mut self.gui);
     }

@@ -8,8 +8,8 @@ pub struct Gui {
 }
 
 impl Gui {
-    const ROWS: usize = 25;
-    const COLS: usize = 40;
+    pub const ROWS: usize = 25;
+    pub const COLS: usize = 40;
 
     pub fn new() -> Gui {
         Gui {
@@ -109,6 +109,12 @@ impl Gui {
     pub fn write_string<T: ToString>(&mut self, txt: &T) {
         for ch in txt.to_string().chars() {
             self.write_char(ch as u8);
+        }
+    }
+
+    pub fn set(&mut self, x: usize, y: usize, val: u8) {
+        if x < Gui::COLS && y < Gui::ROWS {
+            self.screen[y * Gui::COLS + x] = val;
         }
     }
 }
