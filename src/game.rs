@@ -1,7 +1,7 @@
 use bracket_terminal::prelude::*;
 use specs::prelude::*;
 
-use crate::{gui::Gui, map::Map, components::Renderable};
+use crate::{components::Renderable, gui::Gui, map::Map};
 
 pub struct Game {
     stage: Stage,
@@ -18,7 +18,7 @@ impl Game {
     pub fn new() -> Game {
         Game {
             stage: Stage::Init,
-            map : Map::new(50, 30),
+            map: Map::new(50, 30),
             redraw: false,
         }
     }
@@ -29,8 +29,7 @@ impl Game {
             let mut renderables = ecs.write_storage::<Renderable>();
 
             if let Some(r) = renderables.get_mut(*player) {
-                self.map
-                    .draw(gui, r.loc.x as usize, r.loc.y as usize);
+                self.map.draw(gui, r.loc.x as usize, r.loc.y as usize);
                 self.redraw = false;
             }
         }
@@ -38,11 +37,11 @@ impl Game {
         match self.stage {
             Stage::Init => {
                 gui.clear_screen();
+                gui.write_string(&"WELCOME!");
 
                 self.stage = Stage::Wait;
             }
-            Stage::Wait => {
-            }
+            Stage::Wait => {}
         }
     }
 
@@ -51,7 +50,7 @@ impl Game {
         let mut renderables = ecs.write_storage::<Renderable>();
 
         if let Some(r) = renderables.get_mut(*player) {
-            r.loc =  newloc;
+            r.loc = newloc;
             self.map.reveal(r.loc, 3);
             self.redraw = true;
         }
@@ -69,7 +68,7 @@ impl Game {
     }
 
     fn try_move(&mut self, ecs: &mut World, delta_x: i32, delta_y: i32) {
-        let mut x : Option<Point> = None;
+        let mut x: Option<Point> = None;
 
         {
             let player = ecs.read_resource::<Entity>();

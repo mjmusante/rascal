@@ -1,6 +1,5 @@
 use crate::gui::Gui;
 use bracket_terminal::prelude::*;
-use std::cmp::{max, min};
 
 pub struct Map {
     layout: Vec<Tile>,
@@ -8,8 +7,8 @@ pub struct Map {
     width: usize,
     height: usize,
     upstairs: Point,
-    offsetx: usize,
-    offsety: usize,
+    map_offset_x: i32,
+    map_offset_y: i32,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -35,8 +34,8 @@ impl Map {
             layout: vec![Tile::Stone; width * height],
             revealed: vec![false; width * height],
             upstairs: Point { x: 0, y: 0 },
-            offsetx: 0,
-            offsety: 0,
+            map_offset_x: 0,
+            map_offset_y: 0,
         };
 
         map.generate_level();
@@ -84,39 +83,44 @@ impl Map {
     }
 
     pub fn draw(&mut self, gui: &mut Gui, xcenter: usize, ycenter: usize) {
-        let midx = Gui::COLS / 2;
-        let midy = Gui::ROWS / 2;
+        let (xleft, ytop, width, height) = gui.map_window();
 
-        self.offsetx = if xcenter < midx {
+        let midx = width / 2;
+        let midy = height / 2;
+
+        let offsetx = if xcenter < midx {
             0
         } else if xcenter >= self.width - midx {
-            self.width - Gui::COLS
+            self.width - width
         } else {
             xcenter - midx
         };
 
-        self.offsety = if ycenter < midy {
+        let offsety = if ycenter < midy {
             0
         } else if ycenter >= self.height - midy {
-            self.height - Gui::ROWS
+            self.height - height
         } else {
             ycenter - midy
         };
 
-        for row in 0..Gui::ROWS {
-            for col in 0..Gui::COLS {
-                let maploc = (row + self.offsety) * self.width + col + self.offsetx;
+        for row in 0..height {
+            for col in 0..width {
+                let maploc = (row + offsety) * self.width + col + offsetx;
 
                 if self.revealed[maploc] {
-                    gui.set(col, row, self.layout[maploc].glyph());
+                    gui.set(col + xleft, row + ytop, self.layout[maploc].glyph());
                 } else {
-                    gui.set(col, row, 32);
+                    gui.set(col + xleft, row + ytop, 32);
                 }
             }
         }
+
+        self.map_offset_x = xleft as i32 - offsetx as i32;
+        self.map_offset_y = ytop as i32 - offsety as i32;
     }
 
     pub fn get_offset(&self) -> (i32, i32) {
-        (self.offsetx as i32, self.offsety as i32)
+        (self.map_offset_x as i32, self.map_offset_y as i32)
     }
 }

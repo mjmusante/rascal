@@ -27,11 +27,15 @@ impl GameState for Interface {
             let offset = self.game.map_offset();
 
             for r in (&renderables).join() {
-                ctx.set(r.loc.x - offset.0, r.loc.y - offset.1,
-                        RGB::named(GREEN), RGB::named(BLACK), r.glyph);
+                ctx.set(
+                    r.loc.x + offset.0,
+                    r.loc.y + offset.1,
+                    RGB::named(GREEN),
+                    RGB::named(BLACK),
+                    r.glyph,
+                );
             }
         }
-
 
         self.game.run(&mut self.gui, &mut self.ecs);
     }
@@ -47,15 +51,17 @@ impl Interface {
 
         let loc = game.initial_loc();
 
-        let player = ecs.create_entity()
-            .with(Player{})
-            .with(Renderable{loc, glyph: 0})
+        let player = ecs
+            .create_entity()
+            .with(Player {})
+            .with(Renderable { loc, glyph: 0 })
             .build();
         ecs.insert(player);
 
         Interface {
             gui: Gui::new(),
-            game, ecs,
+            game,
+            ecs,
         }
     }
 

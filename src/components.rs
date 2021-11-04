@@ -10,5 +10,3 @@ pub struct Renderable {
 
 #[derive(Component)]
 pub struct Player;
-
-

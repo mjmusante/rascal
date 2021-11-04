@@ -117,4 +117,9 @@ impl Gui {
             self.screen[y * Gui::COLS + x] = val;
         }
     }
+
+    // xpos, ypos, width, height
+    pub fn map_window(&self) -> (usize, usize, usize, usize) {
+        (0, 3, 40, 21)
+    }
 }
