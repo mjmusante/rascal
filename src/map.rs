@@ -8,8 +8,8 @@ pub struct Map {
     width: usize,
     height: usize,
     upstairs: Point,
-    centerx: usize,
-    centery: usize,
+    offsetx: usize,
+    offsety: usize,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -35,8 +35,8 @@ impl Map {
             layout: vec![Tile::Stone; width * height],
             revealed: vec![false; width * height],
             upstairs: Point { x: 0, y: 0 },
-            centerx: 0,
-            centery: 0,
+            offsetx: 0,
+            offsety: 0,
         };
 
         map.generate_level();
@@ -44,8 +44,8 @@ impl Map {
     }
 
     fn generate_level(&mut self) {
-        for row in 10..15 {
-            for col in 10..28 {
+        for row in 2..29 {
+            for col in 2..48 {
                 let loc = row * self.width + col;
                 self.layout[loc] = Tile::Open;
             }
@@ -86,12 +86,27 @@ impl Map {
     pub fn draw(&mut self, gui: &mut Gui, xcenter: usize, ycenter: usize) {
         let midx = Gui::COLS / 2;
         let midy = Gui::ROWS / 2;
-        self.centerx = min(max(xcenter, midx), self.width - midx);
-        self.centery = min(max(ycenter, midy), self.height - midy);
+
+        self.offsetx = if xcenter < midx {
+            0
+        } else if xcenter >= self.width - midx {
+            self.width - Gui::COLS
+        } else {
+            xcenter - midx
+        };
+
+        self.offsety = if ycenter < midy {
+            0
+        } else if ycenter >= self.height - midy {
+            self.height - Gui::ROWS
+        } else {
+            ycenter - midy
+        };
 
         for row in 0..Gui::ROWS {
             for col in 0..Gui::COLS {
-                let maploc = (row + self.centery - midy) * self.width + col + self.centerx - midx;
+                let maploc = (row + self.offsety) * self.width + col + self.offsetx;
+
                 if self.revealed[maploc] {
                     gui.set(col, row, self.layout[maploc].glyph());
                 } else {
@@ -101,19 +116,7 @@ impl Map {
         }
     }
 
-    pub fn put_char(&self, gui: &mut Gui, loc: Point, val: u8) {
-        let midx = Gui::COLS / 2;
-        let midy = Gui::ROWS / 2;
-        let xloc = if self.centerx > loc.x as usize {
-            midx - (self.centerx - loc.x as usize)
-        } else {
-            midx + (loc.x as usize - self.centerx)
-        };
-        let yloc = if self.centery > loc.y as usize {
-            midy - (self.centery - loc.y as usize)
-        } else {
-            midy + (loc.y as usize - self.centery)
-        };
-        gui.set(xloc, yloc, val);
+    pub fn get_offset(&self) -> (i32, i32) {
+        (self.offsetx as i32, self.offsety as i32)
     }
 }

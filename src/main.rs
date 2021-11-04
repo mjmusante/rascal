@@ -1,5 +1,6 @@
 use bracket_terminal::prelude::*;
 
+mod components;
 mod game;
 mod gui;
 mod interface;
@@ -19,7 +20,7 @@ pub fn main() -> BError {
         .with_font("petchars.png", 8, 8)
         .build()?;
 
-    let gui = Interface::new();
+    let engine = Interface::new();
 
-    main_loop(context, gui)
+    main_loop(context, engine)
 }
