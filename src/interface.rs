@@ -20,22 +20,8 @@ impl GameState for Interface {
         }
 
         ctx.cls();
-        self.gui.draw(ctx);
-
-        {
-            let renderables = self.ecs.read_storage::<Renderable>();
-            let offset = self.game.map_offset();
-
-            for r in (&renderables).join() {
-                ctx.set(
-                    r.loc.x + offset.0,
-                    r.loc.y + offset.1,
-                    RGB::named(GREEN),
-                    RGB::named(BLACK),
-                    r.glyph,
-                );
-            }
-        }
+        let offset = self.game.map_offset();
+        self.gui.draw(ctx, &self.ecs, offset);
 
         self.game.run(&mut self.gui, &mut self.ecs);
     }
