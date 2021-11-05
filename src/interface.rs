@@ -44,11 +44,10 @@ impl GameState for Interface {
 impl Interface {
     pub fn new() -> Interface {
         let mut ecs = World::new();
+
+        register_components(&mut ecs);
+
         let game = Game::new();
-
-        ecs.register::<Player>();
-        ecs.register::<Renderable>();
-
         let loc = game.initial_loc();
 
         let player = ecs

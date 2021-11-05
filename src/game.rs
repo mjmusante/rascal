@@ -1,7 +1,7 @@
 use bracket_terminal::prelude::*;
 use specs::prelude::*;
 
-use crate::{components::Renderable, gui::Gui, map::Map};
+use crate::{components::{Item, Renderable}, gui::Gui, map::Map};
 
 pub struct Game {
     stage: Stage,
@@ -38,6 +38,11 @@ impl Game {
             Stage::Init => {
                 gui.clear_screen();
                 gui.write_string(&"WELCOME!");
+
+                ecs.create_entity()
+                    .with(Item{})
+                    .with(Renderable { loc: Point { x: 46, y: 26 }, glyph: 33 })
+                    .build();
 
                 self.stage = Stage::Wait;
             }

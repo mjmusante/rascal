@@ -10,3 +10,12 @@ pub struct Renderable {
 
 #[derive(Component)]
 pub struct Player;
+
+#[derive(Component)]
+pub struct Item;
+
+pub fn register_components(ecs: &mut World) {
+    ecs.register::<Player>();
+    ecs.register::<Renderable>();
+    ecs.register::<Item>();
+}
