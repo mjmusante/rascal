@@ -107,4 +107,8 @@ impl Game {
     pub fn map_offset(&self) -> (i32, i32) {
         self.map.get_offset()
     }
+
+    pub fn can_see(&self, x: i32, y: i32) -> bool {
+        self.map.is_visible(x, y)
+    }
 }

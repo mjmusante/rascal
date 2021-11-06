@@ -21,7 +21,20 @@ impl GameState for Interface {
 
         ctx.cls();
         let offset = self.game.map_offset();
-        self.gui.draw(ctx, &self.ecs, offset);
+        {
+            let renderables = self.ecs.read_storage::<Renderable>();
+
+            for r in (&renderables).join() {
+                if self.game.can_see(r.loc.x, r.loc.y) {
+                    self.gui.set(
+                        (r.loc.x + offset.0) as usize,
+                        (r.loc.y + offset.1) as usize,
+                        r.glyph,
+                    );
+                }
+            }
+        }
+        self.gui.draw(ctx);
 
         self.game.run(&mut self.gui, &mut self.ecs);
     }

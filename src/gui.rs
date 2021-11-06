@@ -1,7 +1,4 @@
 use bracket_terminal::prelude::*;
-use specs::prelude::*;
-
-use crate::components::Renderable;
 
 pub struct Gui {
     screen: [u8; Gui::ROWS * Gui::COLS],
@@ -23,7 +20,7 @@ impl Gui {
         }
     }
 
-    pub fn draw(&self, ctx: &mut BTerm, ecs: &World, offset: (i32, i32)) {
+    pub fn draw(&self, ctx: &mut BTerm) {
         for row in 0..Gui::ROWS {
             for col in 0..Gui::COLS {
                 let val = self.screen[row * Gui::COLS + col];
@@ -33,18 +30,6 @@ impl Gui {
                     ctx.set(col, row, RGB::named(GREEN), RGB::named(BLACK), val - 128);
                 }
             }
-        }
-
-        let renderables = ecs.read_storage::<Renderable>();
-
-        for r in (&renderables).join() {
-            ctx.set(
-                r.loc.x + offset.0,
-                r.loc.y + offset.1,
-                RGB::named(GREEN),
-                RGB::named(BLACK),
-                r.glyph,
-            );
         }
     }
 

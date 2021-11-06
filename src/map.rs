@@ -4,6 +4,7 @@ use bracket_terminal::prelude::*;
 pub struct Map {
     layout: Vec<Tile>,
     revealed: Vec<bool>,
+    visible: Vec<Point>,
     width: usize,
     height: usize,
     upstairs: Point,
@@ -33,6 +34,7 @@ impl Map {
             height,
             layout: vec![Tile::Stone; width * height],
             revealed: vec![false; width * height],
+            visible: Vec::new(),
             upstairs: Point { x: 0, y: 0 },
             map_offset_x: 0,
             map_offset_y: 0,
@@ -74,12 +76,21 @@ impl Map {
             loc.x as usize - offset
         };
 
+        self.visible.clear();
         for row in top..(top + radius) {
             for col in left..(left + radius) {
                 let loc = row * self.width + col;
                 self.revealed[loc] = true;
+                self.visible.push(Point {
+                    x: col as i32,
+                    y: row as i32,
+                });
             }
         }
+    }
+
+    pub fn is_visible(&self, x: i32, y: i32) -> bool {
+        self.visible.contains(&Point { x, y })
     }
 
     pub fn draw(&mut self, gui: &mut Gui, xcenter: usize, ycenter: usize) {
