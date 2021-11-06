@@ -122,4 +122,20 @@ impl Gui {
     pub fn map_window(&self) -> (usize, usize, usize, usize) {
         (0, 3, 40, 21)
     }
+
+    pub fn draw_box(&mut self, x: usize, y: usize, width: usize, height: usize) {
+        for col in x + 1..x + width {
+            self.set(col, y, 64);
+            self.set(col, y + height, 64);
+        }
+        for row in y + 1..y + height {
+            self.set(x, row, 93);
+            self.set(x + width, row, 93);
+        }
+
+        self.set(x, y, 112);
+        self.set(x + width, y, 110);
+        self.set(x, y + height, 109);
+        self.set(x + width, y + height, 125);
+    }
 }

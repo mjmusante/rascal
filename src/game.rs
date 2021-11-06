@@ -43,6 +43,15 @@ impl Game {
                 gui.clear_screen();
                 gui.write_string(&"WELCOME!");
 
+                {
+                    let player = ecs.read_resource::<Entity>();
+                    let renderables = ecs.read_storage::<Renderable>();
+                    if let Some(r) = renderables.get(*player) {
+                        self.map.reveal(r.loc, 3);
+                        self.redraw = true;
+                    }
+                }
+
                 ecs.create_entity()
                     .with(Item {})
                     .with(Renderable {

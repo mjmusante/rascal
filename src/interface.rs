@@ -10,33 +10,51 @@ pub struct Interface {
     gui: Gui,
     game: Game,
     ecs: World,
+    mode: InterfaceMode,
+}
+
+enum InterfaceMode {
+    Greeting,
+    Game,
 }
 
 impl GameState for Interface {
     fn tick(&mut self, ctx: &mut BTerm) {
-        if let Some(key) = ctx.key {
-            self.game.handle_key(&mut self.ecs, key);
-            self.run_systems();
-        }
-
         ctx.cls();
-        let offset = self.game.map_offset();
-        {
-            let renderables = self.ecs.read_storage::<Renderable>();
 
-            for r in (&renderables).join() {
-                if self.game.can_see(r.loc.x, r.loc.y) {
-                    self.gui.set(
-                        (r.loc.x + offset.0) as usize,
-                        (r.loc.y + offset.1) as usize,
-                        r.glyph,
-                    );
+        match self.mode {
+            InterfaceMode::Greeting => {
+                if let Some(VirtualKeyCode::Q) = ctx.key {
+                    self.mode = InterfaceMode::Game;
+                } else {
+                    self.gui.clear_screen();
+                    self.gui.draw_box(5, 5, 30, 6);
+                }
+            }
+            InterfaceMode::Game => {
+                if let Some(key) = ctx.key {
+                    self.game.handle_key(&mut self.ecs, key);
+                    self.run_systems();
+                }
+                self.game.run(&mut self.gui, &mut self.ecs);
+                let offset = self.game.map_offset();
+                {
+                    let renderables = self.ecs.read_storage::<Renderable>();
+
+                    for r in (&renderables).join() {
+                        if self.game.can_see(r.loc.x, r.loc.y) {
+                            self.gui.set(
+                                (r.loc.x + offset.0) as usize,
+                                (r.loc.y + offset.1) as usize,
+                                r.glyph,
+                            );
+                        }
+                    }
                 }
             }
         }
-        self.gui.draw(ctx);
 
-        self.game.run(&mut self.gui, &mut self.ecs);
+        self.gui.draw(ctx);
     }
 }
 
@@ -60,6 +78,7 @@ impl Interface {
             gui: Gui::new(),
             game,
             ecs,
+            mode: InterfaceMode::Greeting,
         }
     }
 
