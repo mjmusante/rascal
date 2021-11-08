@@ -2,7 +2,7 @@ use bracket_terminal::prelude::*;
 use specs::prelude::*;
 
 use crate::{
-    components::{Item, Renderable},
+    components::{Item, Position, Renderable},
     gui::Gui,
     map::Map,
 };
@@ -29,11 +29,11 @@ impl Game {
 
     pub fn run(&mut self, gui: &mut Gui, ecs: &mut World) {
         if self.redraw {
-            let player = ecs.write_resource::<Entity>();
-            let mut renderables = ecs.write_storage::<Renderable>();
+            let player = ecs.read_resource::<Entity>();
+            let positions = ecs.read_storage::<Position>();
 
-            if let Some(r) = renderables.get_mut(*player) {
-                self.map.draw(gui, r.loc.x as usize, r.loc.y as usize);
+            if let Some(p) = positions.get(*player) {
+                self.map.draw(gui, p.loc.x as usize, p.loc.y as usize);
                 self.redraw = false;
             }
         }
@@ -45,18 +45,18 @@ impl Game {
 
                 {
                     let player = ecs.read_resource::<Entity>();
-                    let renderables = ecs.read_storage::<Renderable>();
-                    if let Some(r) = renderables.get(*player) {
-                        self.map.reveal(r.loc, 3);
+                    let positions = ecs.read_storage::<Position>();
+                    if let Some(p) = positions.get(*player) {
+                        self.map.reveal(p.loc, 3);
                         self.redraw = true;
                     }
                 }
 
                 ecs.create_entity()
                     .with(Item {})
-                    .with(Renderable {
+                    .with(Renderable { glyph: 33 })
+                    .with(Position {
                         loc: Point { x: 46, y: 26 },
-                        glyph: 33,
                     })
                     .build();
 
@@ -68,11 +68,11 @@ impl Game {
 
     pub fn set_player_loc(&mut self, ecs: &mut World, newloc: Point) {
         let player = ecs.write_resource::<Entity>();
-        let mut renderables = ecs.write_storage::<Renderable>();
+        let mut positions = ecs.write_storage::<Position>();
 
-        if let Some(r) = renderables.get_mut(*player) {
-            r.loc = newloc;
-            self.map.reveal(r.loc, 3);
+        if let Some(p) = positions.get_mut(*player) {
+            p.loc = newloc;
+            self.map.reveal(p.loc, 3);
             self.redraw = true;
         }
     }
@@ -93,11 +93,11 @@ impl Game {
 
         {
             let player = ecs.read_resource::<Entity>();
-            let renderables = ecs.read_storage::<Renderable>();
+            let positions = ecs.read_storage::<Position>();
 
-            if let Some(r) = renderables.get(*player) {
-                let newx = r.loc.x + delta_x;
-                let newy = r.loc.y + delta_y;
+            if let Some(p) = positions.get(*player) {
+                let newx = p.loc.x + delta_x;
+                let newy = p.loc.y + delta_y;
                 if self.map.can_go(newx, newy) {
                     x = Some(Point { x: newx, y: newy });
                 }

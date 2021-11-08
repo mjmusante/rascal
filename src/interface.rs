@@ -40,12 +40,13 @@ impl GameState for Interface {
                 let offset = self.game.map_offset();
                 {
                     let renderables = self.ecs.read_storage::<Renderable>();
+                    let positions = self.ecs.read_storage::<Position>();
 
-                    for r in (&renderables).join() {
-                        if self.game.can_see(r.loc.x, r.loc.y) {
+                    for (r, p) in (&renderables, &positions).join() {
+                        if self.game.can_see(p.loc.x, p.loc.y) {
                             self.gui.set(
-                                (r.loc.x + offset.0) as usize,
-                                (r.loc.y + offset.1) as usize,
+                                (p.loc.x + offset.0) as usize,
+                                (p.loc.y + offset.1) as usize,
                                 r.glyph,
                             );
                         }
@@ -70,7 +71,8 @@ impl Interface {
         let player = ecs
             .create_entity()
             .with(Player {})
-            .with(Renderable { loc, glyph: 0 })
+            .with(Renderable { glyph: 0 })
+            .with(Position { loc })
             .build();
         ecs.insert(player);
 
