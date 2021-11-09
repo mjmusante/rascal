@@ -4,6 +4,7 @@ mod components;
 mod game;
 mod gui;
 mod interface;
+mod items;
 mod map;
 
 use interface::Interface;

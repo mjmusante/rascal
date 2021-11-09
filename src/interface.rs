@@ -5,6 +5,7 @@ use crate::components::*;
 
 use crate::game::*;
 use crate::gui::*;
+use crate::items::{show_inventory, MenuResult};
 
 pub struct Interface {
     gui: Gui,
@@ -13,9 +14,10 @@ pub struct Interface {
     mode: InterfaceMode,
 }
 
-enum InterfaceMode {
+pub enum InterfaceMode {
     Greeting,
     Game,
+    ShowInventory,
 }
 
 impl GameState for Interface {
@@ -23,6 +25,12 @@ impl GameState for Interface {
         ctx.cls();
 
         match self.mode {
+            InterfaceMode::ShowInventory => {
+                if show_inventory(&self.ecs, &mut self.gui, ctx.key) == MenuResult::Cancel {
+                    self.mode = InterfaceMode::Game;
+                    self.game.redraw();
+                }
+            }
             InterfaceMode::Greeting => {
                 if let Some(VirtualKeyCode::Q) = ctx.key {
                     self.mode = InterfaceMode::Game;
@@ -32,10 +40,6 @@ impl GameState for Interface {
                 }
             }
             InterfaceMode::Game => {
-                if let Some(key) = ctx.key {
-                    self.game.handle_key(&mut self.ecs, key);
-                    self.run_systems();
-                }
                 self.game.run(&mut self.gui, &mut self.ecs);
                 let offset = self.game.map_offset();
                 {
@@ -50,6 +54,14 @@ impl GameState for Interface {
                                 r.glyph,
                             );
                         }
+                    }
+                }
+
+                if let Some(key) = ctx.key {
+                    if let Some(mode) = self.game.handle_key(&mut self.ecs, key) {
+                        self.mode = mode;
+                    } else {
+                        self.run_systems();
                     }
                 }
             }

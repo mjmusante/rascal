@@ -2,8 +2,9 @@ use bracket_terminal::prelude::*;
 use specs::prelude::*;
 
 use crate::{
-    components::{Item, Position, Renderable},
+    components::{Item, Position, Renderable, WantsToPickUp},
     gui::Gui,
+    interface::InterfaceMode,
     map::Map,
 };
 
@@ -77,15 +78,51 @@ impl Game {
         }
     }
 
-    pub fn handle_key(&mut self, ecs: &mut World, key: VirtualKeyCode) {
+    pub fn redraw(&mut self) {
+        self.redraw = true;
+    }
+
+    pub fn handle_key(&mut self, ecs: &mut World, key: VirtualKeyCode) -> Option<InterfaceMode> {
         match key {
             VirtualKeyCode::H => self.try_move(ecs, -1, 0),
             VirtualKeyCode::J => self.try_move(ecs, 0, 1),
             VirtualKeyCode::K => self.try_move(ecs, 0, -1),
             VirtualKeyCode::L => self.try_move(ecs, 1, 0),
+            VirtualKeyCode::G => self.want_to_get(ecs),
+            VirtualKeyCode::I => {
+                return Some(InterfaceMode::ShowInventory);
+            }
             VirtualKeyCode::Q => std::process::exit(0),
             _ => {}
         };
+
+        None
+    }
+
+    fn want_to_get(&self, ecs: &mut World) {
+        let player = ecs.write_resource::<Entity>();
+        let positions = ecs.read_storage::<Position>();
+        let entities = ecs.entities();
+
+        if let Some(ppos) = positions.get(*player) {
+            let items = ecs.read_storage::<Item>();
+
+            for (entity, _, p) in (&entities, &items, &positions).join() {
+                if *ppos == *p {
+                    let mut pickup = ecs.write_storage::<WantsToPickUp>();
+                    pickup
+                        .insert(
+                            *player,
+                            WantsToPickUp {
+                                collected_by: *player,
+                                entity,
+                            },
+                        )
+                        .expect("Unable to insert want to pickup");
+                    break;
+                }
+            }
+        }
     }
 
     fn try_move(&mut self, ecs: &mut World, delta_x: i32, delta_y: i32) {

@@ -112,6 +112,12 @@ impl Gui {
         }
     }
 
+    pub fn write_at<T: ToString>(&mut self, x: usize, y: usize, txt: &T) {
+        self.cursor_x = x;
+        self.cursor_y = y;
+        self.write_string(txt);
+    }
+
     pub fn set(&mut self, x: usize, y: usize, val: u8) {
         if x < Gui::COLS && y < Gui::ROWS {
             self.screen[y * Gui::COLS + x] = val;
@@ -137,5 +143,11 @@ impl Gui {
         self.set(x + width, y, 110);
         self.set(x, y + height, 109);
         self.set(x + width, y + height, 125);
+
+        for row in y + 1..y + height {
+            for col in x + 1..x + width {
+                self.set(col, row, 32);
+            }
+        }
     }
 }
