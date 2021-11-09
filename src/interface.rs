@@ -5,7 +5,7 @@ use crate::components::*;
 
 use crate::game::*;
 use crate::gui::*;
-use crate::items::{show_inventory, MenuResult};
+use crate::items::{show_inventory, ItemPickupSystem, MenuResult};
 
 pub struct Interface {
     gui: Gui,
@@ -97,6 +97,9 @@ impl Interface {
     }
 
     fn run_systems(&mut self) {
+        let mut ips = ItemPickupSystem {};
+        ips.run_now(&self.ecs);
+
         self.ecs.maintain();
     }
 }

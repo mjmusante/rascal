@@ -2,7 +2,7 @@ use bracket_terminal::prelude::*;
 use specs::prelude::*;
 
 use crate::{
-    components::{Item, Position, Renderable, WantsToPickUp},
+    components::{Item, Name, Position, Renderable, WantsToPickUp},
     gui::Gui,
     interface::InterfaceMode,
     map::Map,
@@ -55,6 +55,9 @@ impl Game {
 
                 ecs.create_entity()
                     .with(Item {})
+                    .with(Name {
+                        name: "POTION".to_string(),
+                    })
                     .with(Renderable { glyph: 33 })
                     .with(Position {
                         loc: Point { x: 46, y: 26 },
