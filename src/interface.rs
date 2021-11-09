@@ -32,11 +32,19 @@ impl GameState for Interface {
                 }
             }
             InterfaceMode::Greeting => {
-                if let Some(VirtualKeyCode::Q) = ctx.key {
+                if let Some(VirtualKeyCode::Return) = ctx.key {
                     self.mode = InterfaceMode::Game;
                 } else {
                     self.gui.clear_screen();
-                    self.gui.draw_box(5, 5, 30, 6);
+                    self.gui.draw_box(5, 5, 30, 8);
+                    self.gui.center(6, &"WELCOME TO RASCAL!");
+                    self.gui.center(8, &"EXPLORE THE DUNGEON");
+                    self.gui.center(9, &"PULL THE FORBIDDEN LEVER");
+                    self.gui.center(10, &"AND ESCAPE ALIVE");
+                    self.gui.center(12, &"PRESS {18}RETURN{146} TO BEGIN");
+                    for col in 0..6 {
+                        self.gui.set(col + 15, 11, 100);
+                    }
                 }
             }
             InterfaceMode::Game => {

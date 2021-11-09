@@ -4,7 +4,7 @@ pub struct Gui {
     screen: [u8; Gui::ROWS * Gui::COLS],
     cursor_x: usize,
     cursor_y: usize,
-    invmode: bool,
+    invmode: u8,
 }
 
 impl Gui {
@@ -16,7 +16,7 @@ impl Gui {
             screen: [0u8; Gui::ROWS * Gui::COLS],
             cursor_x: 0,
             cursor_y: 0,
-            invmode: false,
+            invmode: 0,
         }
     }
 
@@ -27,7 +27,7 @@ impl Gui {
                 if val < 128 {
                     ctx.set(col, row, RGB::named(GREEN), RGB::named(BLACK), val);
                 } else {
-                    ctx.set(col, row, RGB::named(GREEN), RGB::named(BLACK), val - 128);
+                    ctx.set(col, row, RGB::named(BLACK), RGB::named(GREEN), val - 128);
                 }
             }
         }
@@ -68,7 +68,7 @@ impl Gui {
                 self.next_line();
             }
             18 => {
-                self.invmode = true;
+                self.invmode = 128;
             }
             19 => {
                 self.cursor_x = 0;
@@ -81,7 +81,7 @@ impl Gui {
                 }
             }
             146 => {
-                self.invmode = false;
+                self.invmode = 0;
             }
             147 => self.clear_screen(),
             157 => {
@@ -93,11 +93,11 @@ impl Gui {
                 }
             }
             32..=63 => {
-                self.screen[self.cursor_y * Gui::COLS + self.cursor_x] = ch;
+                self.screen[self.cursor_y * Gui::COLS + self.cursor_x] = ch + self.invmode;
                 self.move_right();
             }
             64..=95 => {
-                self.screen[self.cursor_y * Gui::COLS + self.cursor_x] = ch - 64;
+                self.screen[self.cursor_y * Gui::COLS + self.cursor_x] = ch - 64 + self.invmode;
                 self.move_right();
             }
             _ => {
@@ -107,8 +107,23 @@ impl Gui {
     }
 
     pub fn write_string<T: ToString>(&mut self, txt: &T) {
+        let mut esc_state = false;
+        let mut num = 0;
+
         for ch in txt.to_string().chars() {
-            self.write_char(ch as u8);
+            if esc_state {
+                if ch == '}' {
+                    self.write_char(num);
+                    esc_state = false;
+                } else {
+                    num = num * 10 + (ch as u8 - b'0');
+                }
+            } else if ch == '{' {
+                esc_state = true;
+                num = 0;
+            } else {
+                self.write_char(ch as u8);
+            }
         }
     }
 
@@ -116,6 +131,25 @@ impl Gui {
         self.cursor_x = x;
         self.cursor_y = y;
         self.write_string(txt);
+    }
+
+    pub fn center<T: ToString>(&mut self, row: usize, txt: &T) {
+        let mut len = 0;
+        let mut idx = 0;
+        let mut in_esc = false;
+        let charlist: Vec<char> = txt.to_string().chars().collect();
+        while idx < charlist.len() {
+            if charlist[idx] == '{' {
+                in_esc = true;
+            } else if in_esc && charlist[idx] == '}' {
+                in_esc = false;
+            } else if !in_esc {
+                len += 1;
+            }
+            idx += 1;
+        }
+
+        self.write_at((Gui::COLS - len) / 2, row, txt);
     }
 
     pub fn set(&mut self, x: usize, y: usize, val: u8) {
